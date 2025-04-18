@@ -3,6 +3,7 @@ package com.myquickfixj.springsecuritypractice.services;
 import com.myquickfixj.springsecuritypractice.Dto.CustomUserDetails;
 import com.myquickfixj.springsecuritypractice.Entity.User;
 import com.myquickfixj.springsecuritypractice.repository.UserRepo;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,8 +23,7 @@ public class CustomUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
-
+                .orElseThrow(() -> new BadCredentialsException("User not found with username: " + username));
         return new CustomUserDetails(user);
 
     }
