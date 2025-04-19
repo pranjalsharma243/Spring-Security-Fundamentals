@@ -29,36 +29,35 @@ public class AuthController {
 
     @Autowired
     private AuthenticationManager manager;
-    @Autowired
-    private UserDetailsService userDetailsService;
+
     @Autowired
     private JwtService jwtService;
     @Autowired
     private ModelMapper mapper;
 
     @PostMapping("/login")
-    public ResponseEntity<?> createToken(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<JwtResponse> createToken(@RequestBody LoginRequest loginRequest) {
 
-        try{
-            UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),loginRequest.getPassword());
-            Authentication authentication=manager.authenticate(authenticationToken);
+        Authentication authentication;
+        try {
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
+            authentication = manager.authenticate(authenticationToken);
 
         }
         //wo user DB m hone chahiye nhi toh allow nhi hoga
-        catch (AuthenticationException ex){
+        catch (AuthenticationException ex) {
             throw new BadCredentialsException("Invalid User Details !!");
         }
         //authenticated
-        CustomUserDetails userDetails=(CustomUserDetails)userDetailsService.loadUserByUsername(loginRequest.getEmail());
-        String token=jwtService.generateToken(userDetails.getUsername());
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        String token = jwtService.generateToken(userDetails.getUsername());
 
-        User user=userDetails.getUser();
-        JwtResponse response=JwtResponse.builder()
+        User user = userDetails.getUser();
+        JwtResponse response = JwtResponse.builder()
                 .token(token)
                 .user(mapper.map(user, UserDto.class))
                 .build();
         return ResponseEntity.ok(response);
-
 
 
     }
